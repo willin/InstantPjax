@@ -18,32 +18,57 @@
 		toInt: function (obj) {
 			return parseInt(obj, 10) || 0;
 		},
-		// 获取URL不带hash的部分,切去掉ipjax=true部分
+		/**
+		 * 获取URL不带hash的部分,切去掉ipjax=true部分
+		 * @param url
+		 * @returns {string|*}
+		 */
 		getRealUrl: function (url) {
 			url = (url || '').replace(/\#.*?$/, '');
 			url = url.replace('?ipjax=true&', '?').replace('?ipjax=true', '').replace('&ipjax=true', '');
 			return url;
 		},
-		// 获取url的hash部分
+		/**
+		 * 获取url的hash部分
+		 * @param url
+		 * @returns {XML|*|string|void}
+		 */
 		getUrlHash: function (url) {
 			return url.replace(/^[^\#]*(?:\#(.*?))?$/, '$1');
 		},
-		// 获取本地存储的key
-		getLocalKey : function(src) {
+		/**
+		 * 获取本地存储的key 可用 encodeURIComponent()
+		 * @param src url || location.href
+		 * @param ignoreParam options.ignoreparam
+		 * @returns {*} key
+		 */
+		getLocalKey: function (src, ignoreParam) {
 			var url = util.getRealUrl(src);
-			return 'ipjax_' + encodeURIComponent(url.replace(window.location.origin,''));
+			var key = 'ipjax:' + url.replace(window.location.origin, '');
+			if (ignoreParam) {
+				return key.split('?')[0];
+			}
+			return key;
 		},
-		// 清除所有的cache
+		/**
+		 * 清除所有的cache
+		 */
 		removeAllCache: function () {
 			if (!$.support.storage)
 				return;
 			for (var name in localStorage) {
-				if ((name.split('_') || [''])[0] === 'ipjax') {
+				if ((name.split(':') || [''])[0] === 'ipjax') {
 					delete localStorage[name];
 				}
 			}
 		},
-		// 获取cache
+		/**
+		 * 获取cache
+		 * @param src url || location.href
+		 * @param time options.cache
+		 * @param flag options.storage
+		 * @returns {*}
+		 */
 		getCache: function (src, time, flag) {
 			var item;
 			var key = util.getLocalKey(src);
@@ -69,7 +94,13 @@
 			}
 			return null;
 		},
-		// 设置cache
+		/**
+		 * 设置cache
+		 * @param src url || location.href
+		 * @param data html or json data
+		 * @param title page title
+		 * @param flag options.storage
+		 */
 		setCache: function (src, data, title, flag) {
 			var time = util.getTime();
 			var key = util.getLocalKey(src);
@@ -82,7 +113,10 @@
 				localStorage.setItem(key, JSON.stringify(util.stack[key]));
 			}
 		},
-		// 清除cache
+		/**
+		 * 清除cache
+		 * @param src url || location.href
+		 */
 		removeCache: function (src) {
 			var key = util.getLocalKey(src);
 			delete util.stack[key];
@@ -93,8 +127,8 @@
 	};
 
 	//ipjax
-	var ipjaxFn = function () {
-
+	var ipjaxFn = function (options) {
+		return options;
 	};
 
 	var ipjax = function (options) {
@@ -109,7 +143,6 @@
 		$.fn.ipjax = ipjaxFn;
 		$.ipjax = ipjax;
 		$.ipjax.enable = $.noop;
-		/*eslint no-use-before-define:0*/
 		$.ipjax.disable = disable;
 	};
 

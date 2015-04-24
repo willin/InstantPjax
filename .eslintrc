@@ -12,6 +12,7 @@
 			"single"
 		],
 		"no-unused-expressions": 0,
+		"no-use-before-define": 0,
 		"no-loop-func": 0,
 		"no-underscore-dangle": 0,
 		"no-extend-native": 0,
