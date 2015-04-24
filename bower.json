@@ -1,0 +1,21 @@
+{
+  "name": "instantpjax",
+  "main": "instantpjax.js",
+  "version": "1.0.0",
+  "authors": [
+    "Willin Wang <willin@willin.org>"
+  ],
+  "description": "A jQuery Plugin for PJAX with instantclick.",
+  "keywords": [
+    "pjax"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/willin/instantpjax#readme",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

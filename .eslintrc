@@ -1,0 +1,21 @@
+{
+	"env": {
+		"browser": true,
+		"jquery": true
+	},
+	"globals": {
+		"jQuery": true
+	},
+	"rules": {
+		"quotes": [
+			2,
+			"single"
+		],
+		"no-unused-expressions": 0,
+		"no-loop-func": 0,
+		"no-underscore-dangle": 0,
+		"no-extend-native": 0,
+		"dot-notation": 0,
+		"handle-callback-err": 0
+	}
+}

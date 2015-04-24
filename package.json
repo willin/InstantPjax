@@ -1,0 +1,25 @@
+{
+  "name": "instantpjax",
+  "version": "1.0.0",
+  "description": "A jQuery Plugin for PJAX with instantclick.",
+  "main": "instantpjax.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/willin/instantpjax.git"
+  },
+  "keywords": [
+    "pjax"
+  ],
+  "author": "Willin Wang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/willin/instantpjax/issues"
+  },
+  "homepage": "https://github.com/willin/instantpjax#readme",
+  "dependencies": {
+    "eslint": "^0.19.0"
+  }
+}
