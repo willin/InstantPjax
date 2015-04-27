@@ -1,5 +1,7 @@
 # InstantPjax
 
+Not for noob.
+
 ## Compatibility
 
 Use `json2.js` for JSON.parse with IE 6~8
