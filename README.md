@@ -1,5 +1,17 @@
 # InstantPjax
 
+## Compatibility
+
+Use `json2.js` for JSON.parse with IE 6~8
+
+See: [https://github.com/douglascrockford/JSON-js](https://github.com/douglascrockford/JSON-js) for details.
+
+```html
+<!--[if lte IE 8]>
+	<script type="application/javascript" src="https://raw.githubusercontent.com/douglascrockford/JSON-js/master/json2.js"></script>
+<![endif]-->
+```
+
 ## Tests
    
 Tests (in the `tests` folder) are PHP-generated HTML pages with which to check how InstantClick behaves on different browsers. That’s what I use before releasing a new version to make sure there are no obvious regressions.

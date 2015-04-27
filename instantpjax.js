@@ -132,6 +132,12 @@
 	};
 
 	var ipjax = function (options) {
+		options = $.extend(true, {}, $.ajaxSettings, ipjax.defaults, options);
+
+		if ($.isFunction(options.url)) {
+			options.url = options.url();
+		}
+
 		return options;
 	};
 
@@ -144,6 +150,16 @@
 		$.ipjax = ipjax;
 		$.ipjax.enable = $.noop;
 		$.ipjax.disable = disable;
+		$.ipjax.defaults = {
+			timeout: 2000,
+			push: true, // true push, false replace, null for do nothing
+			cache: 24 * 3600 * 365, // Cache time, seconds, 0 for disable 缓存时间,0为不缓存,单位为秒
+			data: {
+				ipjax: true
+			},
+			type: 'GET',
+			dataType: 'html'
+		};
 	};
 
 	var disable = function () {
@@ -161,4 +177,4 @@
 	}
 	$.support.ipjax ? enable() : disable();
 
-})(jQuery);
+})($);
