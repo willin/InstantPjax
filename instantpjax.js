@@ -13,6 +13,7 @@
 	var util = {
 		stack: {},
 		isPreloading: false,
+		timeoutTimer: false,
 		getTime: function () {
 			return new Date() * 1;
 		},
@@ -156,6 +157,15 @@
 				options.container = util.findContainerFor(options.container);
 			}
 			return options;
+		},
+		parseURL: function (url) {
+			var a = document.createElement('a');
+			a.href = url;
+			return a;
+		},
+		locationReplace: function (url) {
+			window.history.replaceState(null, '', ipjax.state.url);
+			window.location.replace(url);
 		}
 	};
 
@@ -166,7 +176,7 @@
 		if (opts.delay) {
 			this.on('mouseout', selector, function (event) {
 				if (util.isPreloading) {
-					//ipjaxCancel(event, opts);
+					ipjaxCancel(event, opts);
 				}
 			});
 		}
@@ -175,7 +185,14 @@
 				opts.container = $(this).attr('data-ipjax') || context;
 			}
 			ipjaxHandle(event, opts);
+
 		});
+	};
+
+	var ipjaxCancel = function (event, container, options) {
+		options = util.optionsFor(container, options);
+		util.isPreloading = false;
+		console.log('canceled');
 	};
 
 	var ipjaxHandle = function (event, container, options) {
@@ -217,13 +234,13 @@
 		};
 
 		var opts = $.extend({}, defaults, options);
-		var startEvent = $.Event('ipjax:start');
-		$(link).trigger(startEvent, [opts]);
+		var triggerEvent = $.Event('ipjax:trigger');
+		$(link).trigger(triggerEvent, [opts]);
 
-		if (!startEvent.isDefaultPrevented()) {
+		if (!triggerEvent.isDefaultPrevented()) {
 			ipjax(opts);
 			event.preventDefault();
-			//$(link).trigger('ipjax:started', [opts]);
+			$(link).trigger('ipjax:triggered', [opts]);
 		}
 
 	};
@@ -247,9 +264,168 @@
 			return !event.isDefaultPrevented();
 		};
 
+		options.beforeSend = function (xhr, settings) {
+			// No timeout for non-GET requests
+			// Its not safe to request the resource again with a fallback method.
+			if (settings.type !== 'GET') {
+				settings.timeout = 0;
+			}
 
+			xhr.setRequestHeader('X-IPJAX', 'true');
+			xhr.setRequestHeader('X-IPJAX-Container', context.selector);
+
+			if (!fire('ipjax:beforeSend', [xhr, settings])) {
+				return false;
+			}
+
+			if (settings.timeout > 0) {
+				util.timeoutTimer = setTimeout(function () {
+					if (fire('pjax:timeout', [xhr, options]))
+						xhr.abort('timeout');
+				}, settings.timeout);
+
+				// Clear timeout setting so jquerys internal timeout isn't invoked
+				settings.timeout = 0;
+			}
+
+			var url = util.parseURL(settings.url);
+			if (hash) {
+				url.hash = hash;
+			}
+			options.requestUrl = util.getRealUrl(url.href);
+		};
+
+		options.complete = function (xhr, textStatus) {
+			if (util.timeoutTimer) {
+				clearTimeout(util.timeoutTimer);
+			}
+
+			fire('ipjax:complete', [xhr, textStatus, options]);
+
+			fire('ipjax:end', [xhr, options]);
+		};
+
+		options.error = function (xhr, textStatus, errorThrown) {
+			var container = extractContainer('', xhr, options);
+
+			var allowed = fire('ipjax:error', [xhr, textStatus, errorThrown, options]);
+			if (options.type == 'GET' && textStatus !== 'abort' && allowed) {
+				util.locationReplace(container.url);
+			}
+		};
+		options.success = function (data, status, xhr) {
+			var previousState = ipjax.state;
+
+			var container = extractContainer(data, xhr, options);
+
+			var url = util.parseURL(container.url);
+			if (hash) {
+				url.hash = hash
+				container.url = url.href
+			}
+
+			// If there is a layout version mismatch, hard load the new url
+			if (currentVersion && latestVersion && currentVersion !== latestVersion) {
+				locationReplace(container.url)
+				return
+			}
+
+			// If the new response is missing a body, hard load the page
+			if (!container.contents) {
+				locationReplace(container.url)
+				return
+			}
+
+			pjax.state = {
+				id: options.id || uniqueId(),
+				url: container.url,
+				title: container.title,
+				container: context.selector,
+				fragment: options.fragment,
+				timeout: options.timeout
+			}
+
+			if (options.push || options.replace) {
+				window.history.replaceState(pjax.state, container.title, container.url)
+			}
+
+			// Clear out any focused controls before inserting new page contents.
+			try {
+				document.activeElement.blur()
+			} catch (e) {
+			}
+
+			if (container.title) document.title = container.title
+
+			fire('pjax:beforeReplace', [container.contents, options], {
+				state: pjax.state,
+				previousState: previousState
+			})
+			context.html(container.contents)
+
+			// FF bug: Won't autofocus fields that are inserted via JS.
+			// This behavior is incorrect. So if theres no current focus, autofocus
+			// the last field.
+			//
+			// http://www.w3.org/html/wg/drafts/html/master/forms.html
+			var autofocusEl = context.find('input[autofocus], textarea[autofocus]').last()[0]
+			if (autofocusEl && document.activeElement !== autofocusEl) {
+				autofocusEl.focus();
+			}
+
+			executeScriptTags(container.scripts)
+
+			var scrollTo = options.scrollTo
+
+			// Ensure browser scrolls to the element referenced by the URL anchor
+			if (hash) {
+				var name = decodeURIComponent(hash.slice(1))
+				var target = document.getElementById(name) || document.getElementsByName(name)[0]
+				if (target) scrollTo = $(target).offset().top
+			}
+
+			if (typeof scrollTo == 'number') $(window).scrollTop(scrollTo)
+
+			fire('pjax:success', [data, status, xhr, options])
+		}
+
+
+		// Initialize pjax.state for the initial page load. Assume we're
+		// using the container and options of the link we're loading for the
+		// back button to the initial page. This ensures good back button
+		// behavior.
+		if (!pjax.state) {
+			pjax.state = {
+				id: uniqueId(),
+				url: window.location.href,
+				title: document.title,
+				container: context.selector,
+				fragment: options.fragment,
+				timeout: options.timeout
+			}
+			window.history.replaceState(pjax.state, document.title)
+		}
+
+		// Cancel the current request if we're already pjaxing
+		abortXHR(pjax.xhr)
+
+		pjax.options = options
+		var xhr = pjax.xhr = $.ajax(options)
+
+		if (xhr.readyState > 0) {
+			if (options.push && !options.replace) {
+				// Cache current container element before replacing it
+				cachePush(pjax.state.id, cloneContents(context))
+
+				window.history.pushState(null, "", options.requestUrl)
+			}
+
+			fire('pjax:start', [xhr, options]);
+			fire('pjax:send', [xhr, options]);
+		}
 
 		console.log(options);
+		return pjax.xhr;
 	};
 
 	var enable = function () {
@@ -278,7 +454,7 @@
 		push: true, // true push, false replace, null for do nothing
 		cache: 24 * 3600 * 365, // Cache time, seconds, 0 for disable 缓存时间,0为不缓存,单位为s
 		storage: true, // use localStorage
-		delay: 100, // mouseover delay,0 for disable mouseover preload,延迟加载,0为取消鼠标移入预加载,单位为ms
+		delay: 0, // mouseover delay,0 for disable mouseover preload,延迟加载,0为取消鼠标移入预加载,单位为ms
 		data: {
 			ipjax: true
 		},
