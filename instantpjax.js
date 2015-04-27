@@ -12,6 +12,7 @@
 
 	var util = {
 		stack: {},
+		isPreloading: false,
 		getTime: function () {
 			return new Date() * 1;
 		},
@@ -123,26 +124,132 @@
 			if ($.support.storage) {
 				localStorage.removeItem(key);
 			}
+		},
+		findContainerFor: function (container) {
+			container = $(container);
+
+			if (!container.length) {
+				throw 'no ipjax container for ' + container.selector;
+			} else if (container.selector !== '' && container.context === document) {
+				return container;
+			} else if (container.attr('id')) {
+				return $('#' + container.attr('id'));
+			} else {
+				throw 'cant get selector for ipjax container!';
+			}
+		},
+		optionsFor: function (container, options) {
+			// Both container and options
+			if (container && options) {
+				options.container = container;
+			}
+			// First argument is options Object
+			else if ($.isPlainObject(container)) {
+				options = container;
+			}
+			// Only container
+			else {
+				options = {container: container};
+			}
+			// Find and validate container
+			if (options.container) {
+				options.container = util.findContainerFor(options.container);
+			}
+			return options;
 		}
 	};
 
 	//ipjax
-	var ipjaxFn = function (options) {
-		return options;
+	var ipjaxFn = function (selector, container, options) {
+		var context = this;
+		var opts = $.extend({}, util.optionsFor(container, options), $.ipjax.defaults);
+		if (opts.delay) {
+			this.on('mouseout', selector, function (event) {
+				if (util.isPreloading) {
+					//ipjaxCancel(event, opts);
+				}
+			});
+		}
+		return this.on((opts.delay ? 'mouseover' : 'click') + '.ipjax', selector, function (event) {
+			if (!opts.container) {
+				opts.container = $(this).attr('data-ipjax') || context;
+			}
+			ipjaxHandle(event, opts);
+		});
+	};
+
+	var ipjaxHandle = function (event, container, options) {
+		options = util.optionsFor(container, options);
+
+		var link = event.currentTarget;
+
+		if (link.tagName.toUpperCase() !== 'A') {
+			throw '$.fn.pjax or $.pjax.click requires an anchor element';
+		}
+		// Middle click, cmd click, and ctrl click should open
+		// links in a new tab as normal.
+		if (event.type !== 'mouseover' && ( event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey )) {
+			return;
+		}
+		// Ignore cross origin links
+		if (location.protocol !== link.protocol || location.hostname !== link.hostname) {
+			return;
+		}
+		// Ignore case when a hash is being tacked on the current URL
+		if (link.href.indexOf('#') > -1 && util.getRealUrl(link.href) == util.getRealUrl(location.href)) {
+			return;
+		}
+		if (typeof options.filter === 'function') {
+			if (options.filter.call(this, link.href, this) === true) {
+				return;
+			}
+		}
+		// Ignore event with default prevented
+		if (event.isDefaultPrevented()) {
+			return;
+		}
+
+		var defaults = {
+			url: link.href,
+			container: $(link).attr('data-pjax'),
+			target: link,
+			eventType: event.type
+		};
+
+		var opts = $.extend({}, defaults, options);
+		var startEvent = $.Event('ipjax:start');
+		$(link).trigger(startEvent, [opts]);
+
+		if (!startEvent.isDefaultPrevented()) {
+			ipjax(opts);
+			event.preventDefault();
+			//$(link).trigger('ipjax:started', [opts]);
+		}
+
 	};
 
 	var ipjax = function (options) {
-		options = $.extend(true, {}, $.ajaxSettings, ipjax.defaults, options);
-
-		if ($.isFunction(options.url)) {
-			options.url = options.url();
+		options = $.extend(true, {}, $.ajaxSettings, $.ipjax.defaults, options);
+		if (!!options.eventType && options.eventType === 'mouseover') {
+			util.isPreloading = true;
 		}
+		var target = options.target;
+		var hash = util.getUrlHash(options.url);
+		var context = options.context = util.findContainerFor(options.container);
 
-		return options;
-	};
+		function fire(type, args, props) {
+			if (!props) {
+				props = {};
+			}
+			props.relatedTarget = target;
+			var event = $.Event(type, props);
+			context.trigger(event, args);
+			return !event.isDefaultPrevented();
+		};
 
-	var ipjaxFallback = function (options) {
-		return options;
+
+
+		console.log(options);
 	};
 
 	var enable = function () {
@@ -150,23 +257,13 @@
 		$.ipjax = ipjax;
 		$.ipjax.enable = $.noop;
 		$.ipjax.disable = disable;
-		$.ipjax.defaults = {
-			timeout: 2000,
-			push: true, // true push, false replace, null for do nothing
-			cache: 24 * 3600 * 365, // Cache time, seconds, 0 for disable 缓存时间,0为不缓存,单位为秒
-			data: {
-				ipjax: true
-			},
-			type: 'GET',
-			dataType: 'html'
-		};
 	};
 
 	var disable = function () {
 		$.fn.ipjax = function () {
 			return this;
 		};
-		$.ipjax = ipjaxFallback;
+		$.ipjax = ipjax;
 		$.ipjax.enable = enable;
 		$.ipjax.disable = $.noop;
 	};
@@ -176,5 +273,21 @@
 		$.event.props.push('state');
 	}
 	$.support.ipjax ? enable() : disable();
+	$.ipjax.defaults = {
+		timeout: 2000,
+		push: true, // true push, false replace, null for do nothing
+		cache: 24 * 3600 * 365, // Cache time, seconds, 0 for disable 缓存时间,0为不缓存,单位为s
+		storage: true, // use localStorage
+		delay: 100, // mouseover delay,0 for disable mouseover preload,延迟加载,0为取消鼠标移入预加载,单位为ms
+		data: {
+			ipjax: true
+		},
+		type: 'GET',
+		dataType: 'html',
+		filter: function () {
+
+		}
+	};
+	$.ipjax.util = util;
 
 })($);
