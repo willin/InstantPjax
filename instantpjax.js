@@ -10,10 +10,11 @@
 	$.support.storage = !!window.localStorage;
 
 	var Util = {
+		isPreloading: false,
+		stack: {},
 		toInt: function (obj) {
 			return parseInt(obj);
 		},
-		stack: {},
 		getTime: function () {
 			return new Date * 1;
 		},
@@ -93,18 +94,55 @@
 			}
 		}
 	};
+	var preloadTimer;
 	// ipjax
 	var ipjaxFn = function (selector, container, options) {
 		options = $.extend({
 			selector: selector,
-			container: container,
-			callback: function () {
-			},
-			filter: function () {
-			}
-		}, options);
+			container: container
+		}, ipjax.defaultOptions, options);
 		if (!options.container || !options.selector) {
 			throw new Error('selector & container options must be set');
+		}
+		if (options.delay) {
+			$('body').delegate(options.selector, 'mouseover', function (event) {
+				var $this = $(this), href = $this.attr('href');
+
+				function mouseover() {
+					// 过滤
+					if (typeof options.filter === 'function') {
+						if (options.filter.call(this, href, this) === true) {
+							return true;
+						}
+					}
+					if (href === location.href) {
+						return true;
+					}
+					// 只是hash不同
+					if (Util.getRealUrl(href) == Util.getRealUrl(location.href)) {
+						var hash = Util.getUrlHash(href);
+						if (hash) {
+							location.hash = hash;
+						}
+						return true;
+					}
+					event.preventDefault();
+					options = $.extend(true, options, {
+						url: href,
+						element: $this,
+						title: '',
+						push: true,
+						eventType: event.type
+					});
+					// 发起请求
+					Util.isPreloading = true;
+					ipjax(options);
+				};
+				preloadTimer = setTimeout(mouseover, options.delay);
+			});
+			$('body').delegate(options.selector, 'mouseout', function () {
+				ipjax.cancel();
+			});
 		}
 		$('body').delegate(options.selector, 'click', function (event) {
 			if (event.which > 1 || event.metaKey) {
@@ -136,7 +174,8 @@
 				url: href,
 				element: this,
 				title: '',
-				push: true
+				push: true,
+				eventType: event.type
 			});
 			// 发起请求
 			ipjax(options);
@@ -198,6 +237,7 @@
 		element: null,
 		cache: 24 * 3600 * 7, // 缓存时间, 0为不缓存, 单位为秒
 		storage: true, // 是否使用localstorage将数据保存到本地
+		delay: 300, //mouseover延迟,0为不开启只用点击,单位ms
 		url: '', // 链接地址
 		push: true, // true is push, false is replace, null for do nothing
 		show: 'fade', // 展示的动画
@@ -214,11 +254,11 @@
 			$(ipjax.options.container).trigger('ipjax.start', [xhr, ipjax.options]);
 			xhr && xhr.setRequestHeader('X-IPJAX', true);
 		},
-		error: function (event,jqxhr ) {
+		error: function (event, jqxhr) {
 			ipjax.options.callback && ipjax.options.callback.call(ipjax.options.element, {
 				type: 'error'
 			});
-			if(jqxhr!=='cancel'){
+			if (jqxhr !== 'cancel') {
 				location.href = ipjax.options.url;
 			}
 		},
@@ -304,36 +344,41 @@
 				title += ipjax.options.titleSuffix;
 			}
 		}
-		document.title = title;
-		ipjax.state = {
-			container: ipjax.options.container,
-			timeout: ipjax.options.timeout,
-			cache: ipjax.options.cache,
-			storage: ipjax.options.storage,
-			show: ipjax.options.show,
-			title: title,
-			url: ipjax.options.oldUrl
-		};
-		var query = $.param(ipjax.options.data);
-		if (query != '') {
-			ipjax.state.url = ipjax.options.url + (/\?/.test(ipjax.options.url) ? '&' : '?') + query;
+		if (Util.isPreloading) {
+			Util.isPreloading = false;
 		}
-		if (ipjax.options.push) {
-			if (!ipjax.active) {
-				history.replaceState($.extend({}, ipjax.state, {
-					url: null
-				}), document.title);
-				ipjax.active = true;
+		else {
+			document.title = title;
+			ipjax.state = {
+				container: ipjax.options.container,
+				timeout: ipjax.options.timeout,
+				cache: ipjax.options.cache,
+				storage: ipjax.options.storage,
+				show: ipjax.options.show,
+				title: title,gi
+				url: ipjax.options.oldUrl
+			};
+			var query = $.param(ipjax.options.data);
+			if (query != '') {
+				ipjax.state.url = ipjax.options.url + (/\?/.test(ipjax.options.url) ? '&' : '?') + query;
 			}
-			history.pushState(ipjax.state, document.title, ipjax.options.oldUrl);
-		} else if (ipjax.options.push === false) {
-			history.replaceState(ipjax.state, document.title, ipjax.options.oldUrl);
+			if (ipjax.options.push) {
+				if (!ipjax.active) {
+					history.replaceState($.extend({}, ipjax.state, {
+						url: null
+					}), document.title);
+					ipjax.active = true;
+				}
+				history.pushState(ipjax.state, document.title, ipjax.options.oldUrl);
+			} else if (ipjax.options.push === false) {
+				history.replaceState(ipjax.state, document.title, ipjax.options.oldUrl);
+			}
+			ipjax.options.showFn && ipjax.options.showFn(data, function () {
+				ipjax.options.callback && ipjax.options.callback.call(ipjax.options.element, {
+					type: isCached ? 'cache' : 'success'
+				});
+			}, isCached);
 		}
-		ipjax.options.showFn && ipjax.options.showFn(data, function () {
-			ipjax.options.callback && ipjax.options.callback.call(ipjax.options.element, {
-				type: isCached ? 'cache' : 'success'
-			});
-		}, isCached);
 		// 设置cache
 		if (ipjax.options.cache && !isCached) {
 			Util.setCache(ipjax.options.url, data, title, ipjax.options.storage);
@@ -341,8 +386,14 @@
 	};
 
 	ipjax.cancel = function () {
-		ipjax.xhr.abort('cancel');
-		$(ipjax.options.container).trigger('ipjax.cancel', [ipjax.options]);
+		if (preloadTimer) {
+			clearTimeout(preloadTimer);
+		}
+		if (ipjax.xhr) {
+			ipjax.xhr.abort('cancel');
+			$(ipjax.options.container).trigger('ipjax.cancel', [ipjax.options]);
+		}
+		Util.isPreloading = false;
 	};
 
 	// popstate event

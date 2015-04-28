@@ -1,7 +1,7 @@
 <?php
 	$nocache = '&amp;nocache=' . microtime(true) * 10000;
 	if (isset($_GET['ipjax'])) {
-      usleep(4 * 1000000);
+      //usleep(4 * 1000000);
     }
 ?>
 <!doctype html>
