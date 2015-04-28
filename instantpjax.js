@@ -105,9 +105,8 @@
 			throw new Error('selector & container options must be set');
 		}
 		if (options.delay) {
-			$('body').delegate(options.selector, 'mouseover', function (event) {
+			$('body').delegate(options.selector, 'mouseenter', function (event) {
 				var $this = $(this), href = $this.attr('href');
-
 				function mouseover() {
 					// 过滤
 					if (typeof options.filter === 'function') {
@@ -140,7 +139,7 @@
 				};
 				preloadTimer = setTimeout(mouseover, options.delay);
 			});
-			$('body').delegate(options.selector, 'mouseout', function () {
+			$('body').delegate(options.selector, 'mouseleave', function () {
 				ipjax.cancel();
 			});
 		}
@@ -206,7 +205,7 @@
 		if (!options.showFn) {
 			options.showFn = function (data, fn, isCached) {
 				//Delete data that is ignore with ipjax
-				data = data.replace(/<(.*?)data-no-ipjax(.*?)>(.*?)<\/(.*?)>/g, '');
+				data = data.replace(/<(.*?)data-no-ipjax(.*?)>([\s\S]*?)<\/(.*?)>/g, '');
 				ipjax.showFn(options.show, container, data, fn, isCached);
 			};
 		}
