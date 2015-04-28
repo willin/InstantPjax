@@ -18,8 +18,8 @@
 	<h2>Container</h2>
 	<a href="/tests">Index</a>
 	<a href="/tests/test.php">Test</a>
-	<a href="/tests/package.json.php">JSON</a>
 	<h3><?php echo $_GET['ipjax']; ?></h3>
+	<p>This is a test page.</p>
 </div>
 
 <script src="/tests/jquery.js.php?<?php echo $nocache ?>" data-no-ipjax></script>

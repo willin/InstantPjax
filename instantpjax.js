@@ -184,7 +184,7 @@
 
 	// 发送请求
 	var ipjax = function (options) {
-		options = $.extend(true, ipjax.defaultOptions, options);
+		options = $.extend({}, ipjax.defaultOptions, options);
 		var cache, container = $(options.container);
 		options.oldUrl = options.url;
 		options.url = Util.getRealUrl(options.url);
@@ -319,25 +319,32 @@
 		if (isCached !== true) {
 			isCached = false;
 		}
-		//accept Whole html
-		if (ipjax.html) {
-			data = $(data).find(ipjax.html).html();
+		var title = '';
+		if (typeof data === 'object') {
+			title = data.title || '';
 		}
-		if ((data || '').indexOf('<html') != -1) {
-			ipjax.options.callback && ipjax.options.callback.call(ipjax.options.element, {
-				type: 'error'
-			});
-			location.href = ipjax.options.url;
-			return false;
-		}
-		var title = ipjax.options.title || '', el;
-		if (ipjax.options.element) {
-			el = $(ipjax.options.element);
-			title = el.attr('title') || el.text();
-		}
-		var matches = data.match(/<title>(.*?)<\/title>/);
-		if (matches) {
-			title = matches[1];
+		else {
+			//accept Whole html
+			if (ipjax.html) {
+				data = $(data).find(ipjax.html).html();
+			}
+			if ((data || '').indexOf('<html') != -1) {
+				ipjax.options.callback && ipjax.options.callback.call(ipjax.options.element, {
+					type: 'error'
+				});
+				location.href = ipjax.options.url;
+				return false;
+			}
+			title = ipjax.options.title || '';
+			var el;
+			if (ipjax.options.element) {
+				el = $(ipjax.options.element);
+				title = el.attr('title') || el.text();
+			}
+			var matches = data.match(/<title>(.*?)<\/title>/);
+			if (matches) {
+				title = matches[1];
+			}
 		}
 		if (title) {
 			if (title.indexOf(ipjax.options.titleSuffix) == -1) {
@@ -386,14 +393,12 @@
 	};
 
 	ipjax.cancel = function () {
-		if (preloadTimer) {
-			clearTimeout(preloadTimer);
-		}
-		if (ipjax.xhr) {
-			ipjax.xhr.abort('cancel');
+		preloadTimer && clearTimeout(preloadTimer);
+		ipjax.xhr && ipjax.xhr.abort('cancel');
+		if (Util.isPreloading) {
 			$(ipjax.options.container).trigger('ipjax.cancel', [ipjax.options]);
+			Util.isPreloading = false;
 		}
-		Util.isPreloading = false;
 	};
 
 	// popstate event
@@ -407,7 +412,7 @@
 		if (state && state.container) {
 			if ($(state.container).length) {
 				var data = {
-					url: state.url,
+					url: state.url || location.href,
 					container: state.container,
 					push: null,
 					timeout: state.timeout,
