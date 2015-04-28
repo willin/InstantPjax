@@ -355,7 +355,7 @@
 				cache: ipjax.options.cache,
 				storage: ipjax.options.storage,
 				show: ipjax.options.show,
-				title: title,gi
+				title: title,
 				url: ipjax.options.oldUrl
 			};
 			var query = $.param(ipjax.options.data);
