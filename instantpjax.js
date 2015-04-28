@@ -217,12 +217,12 @@
 		ipjax.options = options;
 		ipjax.options.success = ipjax.success;
 		if (options.cache && (cache = Util.getCache(options.url, options.cache, options.storage))) {
-			if (Util.getLocalKey(options.url) !== Util.prevKey) {
+			if (options.eventType === 'click' || Util.getLocalKey(options.url) !== Util.prevKey) {
 				$(ipjax.options.container).trigger('ipjax.cached', [ipjax.options]);
 				options.title = cache.title;
 				ipjax.success(cache.data, true);
 			}
-			else{
+			else {
 				Util.isPreloading = false;
 			}
 			return true;
