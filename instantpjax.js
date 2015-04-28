@@ -11,6 +11,7 @@
 
 	var Util = {
 		isPreloading: false,
+		prevKey: '',
 		stack: {},
 		toInt: function (obj) {
 			return parseInt(obj);
@@ -107,6 +108,7 @@
 		if (options.delay) {
 			$('body').delegate(options.selector, 'mouseenter', function (event) {
 				var $this = $(this), href = $this.attr('href');
+
 				function mouseover() {
 					// 过滤
 					if (typeof options.filter === 'function') {
@@ -215,10 +217,14 @@
 		ipjax.options = options;
 		ipjax.options.success = ipjax.success;
 		if (options.cache && (cache = Util.getCache(options.url, options.cache, options.storage))) {
-			options.beforeSend();
-			options.title = cache.title;
-			ipjax.success(cache.data, true);
-			options.complete();
+			if (Util.getLocalKey(options.url) !== Util.prevKey) {
+				$(ipjax.options.container).trigger('ipjax.cached', [ipjax.options]);
+				options.title = cache.title;
+				ipjax.success(cache.data, true);
+			}
+			else{
+				Util.isPreloading = false;
+			}
 			return true;
 		}
 		if (ipjax.xhr && ipjax.xhr.readyState < 4) {
@@ -386,6 +392,7 @@
 			}, isCached);
 		}
 		// 设置cache
+		Util.prevKey = Util.getLocalKey(ipjax.options.url);
 		if (ipjax.options.cache && !isCached) {
 			Util.setCache(ipjax.options.url, data, title, ipjax.options.storage);
 		}

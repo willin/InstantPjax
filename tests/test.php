@@ -32,6 +32,9 @@
 	$(document).on('ipjax.end',function(){
     	console.log('ipjax.end');
     });
+    $(document).on('ipjax.cached',function(){
+		console.log('ipjax.cached');
+	});
     $(document).on('ipjax.cancel',function(){
 		console.log('ipjax.cancel');
 	});
