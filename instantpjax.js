@@ -1,4 +1,4 @@
-/* Instantipjax 1.0.0 | (C) 2015-2015 Willin Wang | https://github.com/willin/instantipjax */
+/* Instantipjax 1.0.1 | (C) 2015-2015 Willin Wang | https://github.com/willin/instantipjax */
 
 (function ($) {
 	'use strict';
@@ -429,7 +429,8 @@
 					cache: state.cache,
 					storage: state.storage,
 					title: state.title,
-					element: null
+					element: null,
+					eventType: 'click'
 				};
 				ipjax(data);
 			} else {
