@@ -1,5 +1,8 @@
 <?php
 	$nocache = '&amp;nocache=' . microtime(true) * 10000;
+	if (isset($_GET['ipjax'])) {
+      usleep(4 * 1000000);
+    }
 ?>
 <!doctype html>
 <head>
@@ -14,6 +17,7 @@
 <div id="container">
 	<h2>Container</h2>
 	<a href="/tests">Index</a>
+	<h3><?php echo $_GET['ipjax']; ?></h3>
 </div>
 
 <script src="/tests/jquery.js.php?<?php echo $nocache ?>" data-no-ipjax></script>

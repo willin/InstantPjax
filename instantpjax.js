@@ -171,6 +171,9 @@
 				ipjax.showFn(options.show, container, data, fn, isCached);
 			};
 		}
+		if (options.type !== 'GET') {
+			options.timeout = 0;
+		}
 		ipjax.options = options;
 		ipjax.options.success = ipjax.success;
 		if (options.cache && (cache = Util.getCache(options.url, options.cache, options.storage))) {
@@ -184,6 +187,7 @@
 			ipjax.xhr.onreadystatechange = $.noop;
 			ipjax.xhr.abort();
 		}
+
 		ipjax.xhr = $.ajax(ipjax.options);
 	};
 
@@ -210,11 +214,13 @@
 			$(ipjax.options.container).trigger('ipjax.start', [xhr, ipjax.options]);
 			xhr && xhr.setRequestHeader('X-IPJAX', true);
 		},
-		error: function () {
+		error: function (event,jqxhr ) {
 			ipjax.options.callback && ipjax.options.callback.call(ipjax.options.element, {
 				type: 'error'
 			});
-			location.href = ipjax.options.url;
+			if(jqxhr!=='cancel'){
+				location.href = ipjax.options.url;
+			}
 		},
 		complete: function (xhr) {
 			$(ipjax.options.container).trigger('ipjax.end', [xhr, ipjax.options]);
@@ -332,6 +338,11 @@
 		if (ipjax.options.cache && !isCached) {
 			Util.setCache(ipjax.options.url, data, title, ipjax.options.storage);
 		}
+	};
+
+	ipjax.cancel = function () {
+		ipjax.xhr.abort('cancel');
+		$(ipjax.options.container).trigger('ipjax.cancel', [ipjax.options]);
 	};
 
 	// popstate event
