@@ -119,7 +119,7 @@
 					if (href === location.href) {
 						return true;
 					}
-					if (href.indexOf(location.origin) === -1) {
+					if (href.indexOf('http') === 0 && href.indexOf(location.origin) === -1) {
 						return true;
 					}
 					// 只是hash不同
@@ -162,7 +162,7 @@
 			if (href === location.href) {
 				return true;
 			}
-			if (href.indexOf(location.origin) === -1) {
+			if (href.indexOf('http') === 0 && href.indexOf(location.origin) === -1) {
 				return true;
 			}
 			// 只是hash不同
