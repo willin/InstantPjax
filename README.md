@@ -2,6 +2,20 @@
 
 Not for noob.
 
+## Installation
+
+```shell
+bower install instantpjax
+```
+
+or download here: 
+
+[https://github.com/willin/InstantPjax/releases](https://github.com/willin/InstantPjax/releases)
+
+or use directly: 
+
+[https://rawgit.com/willin/InstantPjax/dist/instantpjax.min.js](https://rawgit.com/willin/InstantPjax/dist/instantpjax.min.js)
+
 ## Usage
 
 First of all, you need to require this js.
@@ -86,7 +100,7 @@ See [jQuery.ajax/#jQuery-ajax-settings](http://api.jquery.com/jQuery.ajax/#jQuer
 
 #### $.support.ipjax
 
-Check `ipjax` plugin.
+Check `ipjax` plugin
 
 #### $.support.storage
 
