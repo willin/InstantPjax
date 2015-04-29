@@ -6,8 +6,16 @@ Not for noob.
 
 First of all, you need to require this js.
 
+```html
+<script src="https://rawgit.com/willin/InstantPjax/dist/instantpjax.min.js" type="application/javascript" data-no-ipjax></script>
 ```
-<script src="https://rawgit.com/willin/InstantPjax/master/instantpjax.js" type="application/javascript" data-no-ipjax></script>
+
+### Ignore Elements
+
+Use `data-no-ipjax` attribute like:
+
+```html
+	<h1 data-no-ipjax>Hello World</h1>
 ```
 
 ### 1. Basic
