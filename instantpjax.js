@@ -270,6 +270,7 @@
 			if (jqxhr !== 'cancel') {
 				location.href = ipjax.options.url;
 			}
+			console.log(event);
 		},
 		complete: function (xhr) {
 			$(ipjax.options.container).trigger('ipjax.end', [xhr, ipjax.options]);
@@ -329,21 +330,18 @@
 			isCached = false;
 		}
 		var title = '';
+
 		if (typeof data === 'object') {
 			title = data.title || '';
 		}
+		else if (!data) {
+			ipjax.options.callback && ipjax.options.callback.call(ipjax.options.element, {
+				type: 'error'
+			});
+			location.href = ipjax.options.url;
+			return false;
+		}
 		else {
-			//accept Whole html
-			if (ipjax.html) {
-				data = $(data).find(ipjax.html).html();
-			}
-			if ((data || '').indexOf('<html') != -1) {
-				ipjax.options.callback && ipjax.options.callback.call(ipjax.options.element, {
-					type: 'error'
-				});
-				location.href = ipjax.options.url;
-				return false;
-			}
 			title = ipjax.options.title || '';
 			var el;
 			if (ipjax.options.element) {
@@ -353,6 +351,9 @@
 			var matches = data.match(/<title>(.*?)<\/title>/);
 			if (matches) {
 				title = matches[1];
+			}
+			if(data.indexOf('<html') !== -1){
+				data = $(data).find(ipjax.options.container).html();
 			}
 		}
 		if (title) {
