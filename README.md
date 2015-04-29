@@ -55,7 +55,7 @@ Use: `$.fn.ipjax`
 
 See [jQuery.ajax/#jQuery-ajax-settings](http://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings)
 
-```
+```js
 	$.ipjax({
 		url: '',
 		container: '#main',
