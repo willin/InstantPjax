@@ -1,4 +1,4 @@
-/* Instantipjax 1.0.1 | (C) 2015-2015 Willin Wang | https://github.com/willin/instantipjax */
+/* Instantipjax 1.0.2 | (C) 2015-2015 Willin Wang | https://github.com/willin/instantipjax */
 
 (function ($) {
 	'use strict';
@@ -119,6 +119,9 @@
 					if (href === location.href) {
 						return true;
 					}
+					if (href.indexOf(location.origin) === -1) {
+						return true;
+					}
 					// 只是hash不同
 					if (Util.getRealUrl(href) == Util.getRealUrl(location.href)) {
 						var hash = Util.getUrlHash(href);
@@ -157,6 +160,9 @@
 				}
 			}
 			if (href === location.href) {
+				return true;
+			}
+			if (href.indexOf(location.origin) === -1) {
 				return true;
 			}
 			// 只是hash不同
@@ -352,7 +358,7 @@
 			if (matches) {
 				title = matches[1];
 			}
-			if(data.indexOf('<html') !== -1){
+			if (data.indexOf('<html') !== -1) {
 				data = $(data).find(ipjax.options.container).html();
 			}
 		}
@@ -458,6 +464,6 @@
 
 	// extra
 	if ($.inArray('state', $.event.props) < 0) {
-		$.event.props.push('state')
+		$.event.props.push('state');
 	}
 })($);
