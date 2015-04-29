@@ -2,6 +2,88 @@
 
 Not for noob.
 
+## Usage
+
+First of all, you need to require this js.
+
+```
+<script src="https://rawgit.com/willin/InstantPjax/master/instantpjax.js" type="application/javascript" data-no-ipjax></script>
+```
+
+### 1. Basic
+
+Use: `$.fn.ipjax`
+
+```js
+	/*selector,container,config*/
+	$(document).ipjax('a','#main',{
+		timeout: 2000, //ms
+		cache:  3600*24*7, //s, 0 for disable cache
+		storage: true, //false for disable localStorage
+		delay: 300, //ms, 0 for disable mouse over preloading
+		push: true, // true is push, false is replace, null for do nothing
+		titleSuffix: '', 
+		show: '', // _default/fade or Animation Function(data, callback, isCached)
+	});
+	$(document).on('ipjax.start',function(){
+		//start animation here
+		// Example:
+		/*
+		$('#loading').show();
+		*/
+	});
+	$(document).on('ipjax.end',function(){
+		//end animation here
+		// Example:
+		/*
+		$('#loading').hide();
+		*/
+	});
+	$(document).on('ipjax.cached',function(){
+		//if cached animation here
+		// Example:
+		/*
+		$($.ipjax.options.element).addClass('cached');
+		$($.ipjax.options.element).one('mouseleave',function(){
+		  $(this).removeClass('cached');
+		});
+		*/
+	});
+```
+
+### 2. Manual Request
+
+See [jQuery.ajax/#jQuery-ajax-settings](http://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings)
+
+```
+	$.ipjax({
+		url: '',
+		container: '#main',
+		timeout: 2000, //ms
+        cache:  3600*24*7, //s, 0 for disable cache
+        storage: true, //false for disable localStorage
+        delay: 300, //ms, 0 for disable mouse over preloading
+        push: true, // true is push, false is replace, null for do nothing
+        titleSuffix: '', 
+        show: '', // _default/fade or Animation Function(data, callback, isCached)
+        type:'GET',
+        dataType: 'html',
+        data:{
+            ipjax: true
+        }
+	});
+```
+
+### APIs
+
+#### $.support.ipjax
+
+Check `ipjax` plugin.
+
+#### $.support.storage
+
+Check `localStorage` 
+
 ## Compatibility
 
 Use `json2.js` for JSON.parse with IE 6~8
