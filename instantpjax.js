@@ -122,6 +122,13 @@
 					if (href.indexOf('http') === 0 && href.indexOf(location.origin) === -1) {
 						return true;
 					}
+
+					var extention = (href || '').toLowerCase().split('.');
+					extention = extention[extention.length - 1];
+					if ($.inArray(extention, ['png', 'jpg', 'gif', 'zip', 'rar', '7z', 'exe', 'doc', 'docx', 'pdf', 'ppt', 'pptx', 'xls', 'xlsx']) !== -1) {
+						return true;
+					}
+
 					// 只是hash不同
 					if (Util.getRealUrl(href) == Util.getRealUrl(location.href)) {
 						var hash = Util.getUrlHash(href);
@@ -165,6 +172,13 @@
 			if (href.indexOf('http') === 0 && href.indexOf(location.origin) === -1) {
 				return true;
 			}
+
+			var extention = (href || '').toLowerCase().split('.');
+			extention = extention[extention.length - 1];
+			if ($.inArray(extention, ['png', 'jpg', 'gif', 'zip', 'rar', '7z', 'exe', 'doc', 'docx', 'pdf', 'ppt', 'pptx', 'xls', 'xlsx']) !== -1) {
+				return true;
+			}
+
 			// 只是hash不同
 			if (Util.getRealUrl(href) == Util.getRealUrl(location.href)) {
 				var hash = Util.getUrlHash(href);
