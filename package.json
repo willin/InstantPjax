@@ -1,6 +1,6 @@
 {
 	"name": "instantpjax",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "A jQuery Plugin for PJAX with instantclick.",
 	"main": "instantpjax.js",
 	"scripts": {

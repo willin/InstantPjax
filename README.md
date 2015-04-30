@@ -39,7 +39,7 @@ Use: `$.fn.ipjax`
 ```js
 	/*selector,container,config*/
 	$(document).ipjax('a','#main',{
-		timeout: 2000, //ms
+		timeout: 10000, //ms
 		cache:  3600*24*7, //s, 0 for disable cache
 		storage: true, //false for disable localStorage
 		delay: 300, //ms, 0 for disable mouse over preloading
@@ -81,7 +81,7 @@ See [jQuery.ajax/#jQuery-ajax-settings](http://api.jquery.com/jQuery.ajax/#jQuer
 	$.ipjax({
 		url: '',
 		container: '#main',
-		timeout: 2000, //ms
+		timeout: 10000, //ms
         cache:  3600*24*7, //s, 0 for disable cache
         storage: true, //false for disable localStorage
         delay: 300, //ms, 0 for disable mouse over preloading

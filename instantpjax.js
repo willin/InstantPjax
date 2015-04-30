@@ -1,4 +1,4 @@
-/* Instantipjax 1.0.2 | (C) 2015-2015 Willin Wang | https://github.com/willin/instantipjax */
+/* Instantipjax 1.0.3 | (C) 2015-2015 Willin Wang | https://github.com/willin/instantipjax */
 
 (function ($) {
 	'use strict';
@@ -262,7 +262,7 @@
 
 	// 默认选项
 	ipjax.defaultOptions = {
-		timeout: 2000,
+		timeout: 10000,
 		element: null,
 		cache: 172800, // 缓存时间, 0为不缓存, 单位为秒
 		storage: true, // 是否使用localstorage将数据保存到本地
