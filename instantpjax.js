@@ -250,7 +250,7 @@
 	ipjax.defaultOptions = {
 		timeout: 2000,
 		element: null,
-		cache: 24 * 3600 * 7, // 缓存时间, 0为不缓存, 单位为秒
+		cache: 172800, // 缓存时间, 0为不缓存, 单位为秒
 		storage: true, // 是否使用localstorage将数据保存到本地
 		delay: 300, //mouseover延迟,0为不开启只用点击,单位ms
 		url: '', // 链接地址

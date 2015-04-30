@@ -96,6 +96,32 @@ See [jQuery.ajax/#jQuery-ajax-settings](http://api.jquery.com/jQuery.ajax/#jQuer
 	});
 ```
 
+### 3. Advanced Custom Show Animation
+
+Extends `$.ipjax.showFx`:
+
+```js
+$.extend($.ipjax.showFx,{
+	// Codes Here
+	// Example:
+	/*
+    animation:function(data, callback, isCached) {
+      this.html(data);
+      callback && callback.call(this, data, isCached);
+    }
+    */
+});
+```
+
+Then use like this:
+
+```js
+$(document).ipjax('a','#main',{
+	// Example:
+	show: 'animation'
+});
+```
+
 ### APIs
 
 #### $.support.ipjax
