@@ -1,4 +1,4 @@
-/* Instantipjax 1.0.3 | (C) 2015-2015 Willin Wang | https://github.com/willin/instantipjax */
+/* Instantipjax 1.0.4 | (C) 2015-2015 Willin Wang | https://github.com/willin/instantipjax */
 
 (function ($) {
 	'use strict';
