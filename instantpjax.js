@@ -236,20 +236,23 @@
 		}
 		ipjax.options = options;
 		ipjax.options.success = ipjax.success;
-		if (options.cache && (cache = Util.getCache(options.url, options.cache, options.storage))) {
-			if (options.eventType === 'click') {
-				options.title = cache.title;
-				ipjax.success(cache.data, true);
-			}
-			else if (Util.getLocalKey(options.url) !== Util.prevKey) {
-				$(ipjax.options.container).trigger('ipjax.cached', [ipjax.options]);
-				options.title = cache.title;
-				ipjax.success(cache.data, true);
-			}
-			else {
-				Util.isPreloading = false;
-			}
-			return true;
+		if (options.cache) {
+			if (!options.cacheIgnore || $.inArray(Util.getLocalKey(options.url).replace(/^ipjax:(.*?)$/, '$1'), options.cacheIgnore) === -1)
+				if (cache = Util.getCache(options.url, options.cache, options.storage)) {
+					if (options.eventType === 'click') {
+						options.title = cache.title;
+						ipjax.success(cache.data, true);
+					}
+					else if (Util.getLocalKey(options.url) !== Util.prevKey) {
+						$(ipjax.options.container).trigger('ipjax.cached', [ipjax.options]);
+						options.title = cache.title;
+						ipjax.success(cache.data, true);
+					}
+					else {
+						Util.isPreloading = false;
+					}
+					return true;
+				}
 		}
 		if (ipjax.xhr && ipjax.xhr.readyState < 4) {
 			ipjax.xhr.onreadystatechange = $.noop;
@@ -265,6 +268,7 @@
 		timeout: 10000,
 		element: null,
 		cache: 172800, // 缓存时间, 0为不缓存, 单位为秒
+		cacheIgnore: false,
 		storage: true, // 是否使用localstorage将数据保存到本地
 		delay: 300, //mouseover延迟,0为不开启只用点击,单位ms
 		url: '', // 链接地址
@@ -277,6 +281,7 @@
 			ipjax: true
 		},
 		dataType: 'html',
+		filter: null,
 		callback: null, // 回调函数
 		// for jquery
 		beforeSend: function (xhr) {

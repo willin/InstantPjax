@@ -25,7 +25,9 @@
 <script src="/tests/jquery.js.php?<?php echo $nocache ?>" data-no-ipjax></script>
 <script src="/tests/instantpjax.js.php?<?php echo $nocache ?>" data-no-ipjax></script>
 <script data-no-ipjax>
-	$(document).ipjax('a','#container',{});
+	$(document).ipjax('a','#container',{
+		cacheIgnore:['/tests']
+	});
 	$(document).on('ipjax.start',function(){
 		console.log('ipjax.start');
 	});
