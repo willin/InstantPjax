@@ -41,7 +41,7 @@ Use: `$.fn.ipjax`
 	$(document).ipjax('a','#main',{
 		timeout: 10000, //ms
 		cache:  3600*24*7, //s, 0 for disable cache
-		cacheIgnore: ['/','/news'] //paths that do not cache, default: false
+		cacheIgnore: ['/','/news'], //paths that do not cache, default: false
 		storage: true, //false for disable localStorage
 		delay: 300, //ms, 0 for disable mouse over preloading
 		push: true, // true is push, false is replace, null for do nothing
