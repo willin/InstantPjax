@@ -485,4 +485,4 @@
 	if ($.inArray('state', $.event.props) < 0) {
 		$.event.props.push('state');
 	}
-})($);
+})(jQuery);
